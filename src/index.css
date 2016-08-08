@@ -3,3 +3,22 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+
+.not_yet{
+  background-color: #FFE3E3;
+}
+.preliminary{
+  background-color: #FFFEE3;
+}
+.final{
+  background-color: #E6FFE3;
+}
+
+.isdata{
+  background-color: #4BABE6;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}

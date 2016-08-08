@@ -6,9 +6,6 @@ import ResponsiveFixedDataTable from 'responsive-fixed-data-table';
 
 class CustomCell extends Component{
   getData(data, index, col){
-    if (col == "Cruise"){
-      console.log(data[index][col]);
-    }
         try{
             return data[index][col].map(function(cell){
               if (cell.href){
@@ -56,6 +53,13 @@ class App extends Component {
 
   componentDidMount(){
     this.serverRequest = $.getJSON(this.props.source, function(result){
+        var rows = result.rows;
+        result.rows = rows.sort(function(a, b){
+          var x = a["Dates"][0].text;
+          var y = b["Dates"][0].text;
+          var res = x > y ? -1 : x < y ? 1 : 0;
+          return res;
+        });
         this.setState(result);
       }.bind(this));
   }
@@ -63,7 +67,7 @@ class App extends Component {
   getRowHeight(rowIndex){
     var row = this.state.rows[rowIndex];
     var rowItemLengths = Object.keys(row).map(function(key){return row[key].length});
-    const margins = 48;
+    const margins = 26;
     const liHeight = 18;
     return margins + liHeight * Math.max.apply(null, rowItemLengths);
   }
@@ -83,7 +87,6 @@ class App extends Component {
           )
     }.bind(this));
 
-    console.log(this.state.rows);
     return (
 			 <ResponsiveFixedDataTable
         rowsCount={this.state.rows.length}

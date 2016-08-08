@@ -1,7 +1,8 @@
 {
-  "name": "hello-world",
+  "name": "hydrotable",
   "version": "0.0.1",
   "private": true,
+  "homepage": "http://tmp.h2o.ucsd.edu/2016-08/hydrotable3",
   "devDependencies": {
     "react-scripts": "0.2.1"
   },

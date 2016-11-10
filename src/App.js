@@ -11,7 +11,7 @@ class CustomCell extends Component{
               if (cell.href){
               return (
                   <li className={cell.status}>
-                    <a href={cell.href}>{cell.text}</a>
+                    <a target="_blank" href={cell.href}>{cell.text}</a>
                   </li>
                   )
               } else {

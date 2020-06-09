@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "fixed-data-table": "^0.6.3",
+    "jquery": "^3.5.1",
     "react": "^15.2.1",
     "react-dom": "^15.2.1",
     "responsive-fixed-data-table": "^2.0.0"

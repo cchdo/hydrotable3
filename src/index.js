@@ -5,6 +5,6 @@ import './index.css';
 import './fixed-data-table.css';
 
 ReactDOM.render(
-  <App source="https://ushydro.ucsd.edu/hydrotable/json"/>,
+  <App source="https://hydrotable.cchdo.io/hydrotable/json"/>,
   document.getElementById('root')
 );

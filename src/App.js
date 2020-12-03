@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
-import {Table, Column, Cell} from 'fixed-data-table';
+import {Column, Cell} from 'fixed-data-table';
 import ResponsiveFixedDataTable from 'responsive-fixed-data-table';
 
 
@@ -55,10 +55,21 @@ class App extends Component {
     this.serverRequest = $.getJSON(this.props.source, function(result){
         var rows = result.rows;
         result.rows = rows.sort(function(a, b){
-          var x = a["Dates"][0].text;
-          var y = b["Dates"][0].text;
-          var res = x > y ? -1 : x < y ? 1 : 0;
-          return res;
+          try {
+            var x = a["Dates"][0].text.split("to");
+            var y = b["Dates"][0].text.split("to");
+            x = Date.parse(x[0].trim())
+            y = Date.parse(y[0].trim())
+            var res = x > y ? -1 : x < y ? 1 : 0;
+            return res;
+          } catch (error) {
+            // Fall back to string comparison
+            var x = a["Dates"][0].text;
+            var y = b["Dates"][0].text;
+            var res = x > y ? -1 : x < y ? 1 : 0;
+            return res;
+
+          }
         });
         this.setState(result);
       }.bind(this));

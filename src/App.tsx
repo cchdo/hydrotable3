@@ -1,24 +1,47 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import { Table } from 'antd';
+import 'antd/dist/antd.css';
+
+const Cell = ({ record }: { record: any }) => {
+  if (record === undefined) {
+    return <div>-</div>
+  }
+
+  return record.map((item: any) => {
+    if (item.href !== null) {
+      return <div><a href={item.href}>{item.text}</a></div>
+    }
+    return <div>{item.text}</div>;
+  })
+}
 
 function App() {
+  const [columns, setColumns] = useState([]);
+  const [rows, setRows] = useState([])
+
+  useEffect(() => {
+    (async () => {
+      const data = await fetch("https://hydrotable.cchdo.io/hydrotable/json")
+      const parsed = await data.json()
+      setColumns(parsed.columns)
+      setRows(parsed.rows)
+    })()
+  }, []);
+
+  const tableCols = columns.map((colName) => {
+    return {
+      title: colName,
+      dataIndex: colName,
+      key: colName,
+      width: 250,
+      fixed: colName === "Cruise",
+      render: (record: any) => <Cell record={record} />
+    }
+  })
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Table columns={tableCols} dataSource={rows} scroll={{ x: tableCols.length * 250 }} sticky pagination={false} />
     </div>
   );
 }

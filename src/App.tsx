@@ -112,6 +112,7 @@ function App() {
       <Table 
       columns={tableCols} 
       dataSource={rows} 
+      size="small"
       scroll={{ x: tableCols.reduce((accum, current) => accum + current.width, 0) }} 
       sticky 
       pagination={false}

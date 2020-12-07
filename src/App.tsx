@@ -22,7 +22,7 @@ const Cell = memo(({ record }: { record: any }) => {
       final = <Tag color="green">Final</Tag>
     }
     if (item.status !== null && item.status.includes("preliminary")){
-      preliminary = <Tag color="yellow">Preliminary</Tag>
+      preliminary = <Tag color="yellow">Submitted</Tag>
     }
     if (item.status !== null && item.status.includes("not_yet")){
       notyet = <Tag color="red">Not Received</Tag>
@@ -86,7 +86,7 @@ function App() {
       sortOrder: colName === "Dates" ? dateSort: undefined,
       filters: [
         {text: "Final", value: "final"},
-        {text: "Preliminary", value: "preliminary"},
+        {text: "Submitted", value: "preliminary"},
         {text: "Not Received", value: "not_yet"},
       ],
       onFilter: (value:any, record:any) => {

@@ -1,11 +1,52 @@
 import React, { useEffect, useState, memo } from 'react';
 import { Table, Tag } from 'antd';
+import XLSX from "xlsx"
 import 'antd/dist/antd.css';
 
 interface HTRecord {
   text: string | number | null;
   href: string | null;
   status: string | null;
+}
+
+const downloadXLS = (columns:any, rows:any) => {
+  const sortedRows = rows.sort(sorter("Dates"))
+  const data = sortedRows.map((row:any) => {
+    return columns.map((col:any) => {
+      let cell = row[col]
+      if (cell === undefined){
+        return undefined
+      }
+      let cell_text = cell.map((data:HTRecord) => data.text).join("; ")
+      return cell_text
+    })
+  })
+  const workbook = XLSX.utils.book_new()
+  const hydrotable = XLSX.utils.aoa_to_sheet([columns, ...data])
+
+  XLSX.utils.book_append_sheet(workbook, hydrotable, "Hydrotable")
+
+  let not_received_data:any = []
+  sortedRows.forEach((row:any) => {
+    let cruise = row["Cruise"][0].text
+    return columns.forEach((col:any) => {
+      let cell = row[col]
+      if (cell === undefined){
+        return undefined
+      }
+      cell.forEach((rec:HTRecord) => {
+        if (rec.status !== null && rec.status.includes("not_yet")){
+          not_received_data.push([rec.text, col, cruise])
+        }
+      })
+    })
+  })
+
+
+  const not_received = XLSX.utils.aoa_to_sheet([["PI", "Param", "Cruise"], ...not_received_data])
+  XLSX.utils.book_append_sheet(workbook, not_received, "Not Received")
+
+  XLSX.writeFile(workbook, "hydrotable.xlsx")
 }
 
 const Cell = memo(({ record }: { record: any }) => {
@@ -109,6 +150,7 @@ function App() {
 
   return (
     <div className="App">
+      <button onClick={()=> downloadXLS(columns, rows)}>Download XLSX</button>
       <Table 
       columns={tableCols} 
       dataSource={rows} 

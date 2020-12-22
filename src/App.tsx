@@ -9,10 +9,10 @@ interface HTRecord {
   status: string | null;
 }
 
-const downloadXLS = (columns:any, rows:any) => {
+const downloadXLS = (columns:string[], rows:Array<{[key: string]: HTRecord[]}>) => {
   const sortedRows = rows.sort(sorter("Dates"))
-  const data = sortedRows.map((row:any) => {
-    return columns.map((col:any) => {
+  const data = sortedRows.map((row) => {
+    return columns.map((col) => {
       let cell = row[col]
       if (cell === undefined){
         return undefined
@@ -26,17 +26,17 @@ const downloadXLS = (columns:any, rows:any) => {
 
   XLSX.utils.book_append_sheet(workbook, hydrotable, "Hydrotable")
 
-  let not_received_data:any = []
-  sortedRows.forEach((row:any) => {
+  let not_received_data:Array<[string, string, string]> = []
+  sortedRows.forEach((row) => {
     let cruise = row["Cruise"][0].text
-    return columns.forEach((col:any) => {
+    return columns.forEach((col) => {
       let cell = row[col]
       if (cell === undefined){
         return undefined
       }
       cell.forEach((rec:HTRecord) => {
         if (rec.status !== null && rec.status.includes("not_yet")){
-          not_received_data.push([rec.text, col, cruise])
+          not_received_data.push([rec.text as string, col, cruise as string])
         }
       })
     })
@@ -75,7 +75,7 @@ const Cell = memo(({ record }: { record: any }) => {
   })
 })
 
-function monthToNum(datestr:any){
+function monthToNum(datestr:string){
   datestr = datestr.replace("Janurary", "01")
   datestr = datestr.replace("February", "02")
   datestr = datestr.replace("March", "03")

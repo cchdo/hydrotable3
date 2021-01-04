@@ -101,6 +101,13 @@ const sorter = (colName:string) => {
   }
 }
 
+const filterable = (colName:string, rows:Array<{[key: string]: HTRecord[]}>) => {
+  let filterTerms = ["final", "preliminary", "not_yet"]
+  let cells = rows.map((row) => row[colName]).flat().filter((value) => value !== undefined)
+  let canFilter = cells.some((value) => filterTerms.some(term => value.status !== null && value.status.includes(term)))
+  return canFilter
+}
+
 function App() {
   const [columns, setColumns] = useState<string[]>([]);
   const [rows, setRows] = useState<Array<{string: HTRecord[]}>>([])
@@ -116,6 +123,7 @@ function App() {
   }, []);
 
   const tableCols = columns.map((colName) => {
+    let canFilter = filterable(colName, rows)
     return {
       title: colName,
       dataIndex: colName,
@@ -125,11 +133,11 @@ function App() {
       render: (record: any) => <Cell record={record} />,
       sorter: sorter(colName),
       sortOrder: colName === "Dates" ? dateSort: undefined,
-      filters: [
+      filters: canFilter ? [
         {text: "Final", value: "final"},
         {text: "Submitted", value: "preliminary"},
         {text: "Not Received", value: "not_yet"},
-      ],
+      ] : undefined,
       onFilter: (value:any, record:any) => {
         const col = record[colName]
 

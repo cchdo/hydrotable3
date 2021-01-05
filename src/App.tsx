@@ -9,33 +9,49 @@ interface HTRecord {
   status: string | null;
 }
 
-const downloadXLS = (columns:string[], rows:Array<{[key: string]: HTRecord[]}>) => {
+const downloadXLS = (columns: string[], rows: Array<{ [key: string]: HTRecord[] }>) => {
   const sortedRows = rows.sort(sorter("Dates"))
-  const data = sortedRows.map((row) => {
-    return columns.map((col) => {
+  let expocodeLinks: { [key: string]: string } = {}
+
+  const data = sortedRows.map((row, rowIndex) => {
+    return columns.map((col, colIndex) => {
       let cell = row[col]
-      if (cell === undefined){
+      if (cell === undefined) {
         return undefined
       }
-      let cell_text = cell.map((data:HTRecord) => data.text).join("; ")
+
+      // Check if the column we are looking at is the expocode and store a link
+      // Since we need to modify the cell properties, most of this is calculating the cell address in "excel" format
+      cell.forEach(rec => {
+        if (col.includes("Expocode") && rec.href !== null) {
+          let colLetter = String.fromCharCode(colIndex + 'A'.charCodeAt(0))
+          let cellAddress = `${colLetter}${rowIndex + 2}`
+          expocodeLinks[cellAddress] = rec.href
+        }
+      })
+
+      let cell_text = cell.map((data: HTRecord) => data.text).join("; ")
       return cell_text
     })
   })
   const workbook = XLSX.utils.book_new()
   const hydrotable = XLSX.utils.aoa_to_sheet([columns, ...data])
 
+  // Make the expocode cells a link
+  Object.entries(expocodeLinks).forEach(([address, href]) => hydrotable[address].l = { Target: href, Tooltip: "Goto CCHDO Cruise page" })
+
   XLSX.utils.book_append_sheet(workbook, hydrotable, "Hydrotable")
 
-  let not_received_data:Array<[string, string, string]> = []
+  let not_received_data: Array<[string, string, string]> = []
   sortedRows.forEach((row) => {
     let cruise = row["Cruise"][0].text
     return columns.forEach((col) => {
       let cell = row[col]
-      if (cell === undefined){
+      if (cell === undefined) {
         return undefined
       }
-      cell.forEach((rec:HTRecord) => {
-        if (rec.status !== null && rec.status.includes("not_yet")){
+      cell.forEach((rec: HTRecord) => {
+        if (rec.status !== null && rec.status.includes("not_yet")) {
           not_received_data.push([rec.text as string, col, cruise as string])
         }
       })
@@ -59,23 +75,23 @@ const Cell = memo(({ record }: { record: any }) => {
     let final;
     let preliminary;
     let notyet;
-    if (item.status !== null && item.status.includes("final")){
+    if (item.status !== null && item.status.includes("final")) {
       final = <Tag color="green">Final</Tag>
     }
-    if (item.status !== null && item.status.includes("preliminary")){
+    if (item.status !== null && item.status.includes("preliminary")) {
       preliminary = <Tag color="yellow">Submitted</Tag>
     }
-    if (item.status !== null && item.status.includes("not_yet")){
+    if (item.status !== null && item.status.includes("not_yet")) {
       notyet = <Tag color="red">Not Received</Tag>
     }
     if (item.href !== null) {
-    return <div>{final}{preliminary}{notyet} <a href={item.href}>{item.text}</a></div>
+      return <div>{final}{preliminary}{notyet} <a href={item.href}>{item.text}</a></div>
     }
     return <div>{final}{preliminary}{notyet} {item.text}</div>;
   })
 })
 
-function monthToNum(datestr:string){
+function monthToNum(datestr: string) {
   datestr = datestr.replace("Janurary", "01")
   datestr = datestr.replace("February", "02")
   datestr = datestr.replace("March", "03")
@@ -91,9 +107,9 @@ function monthToNum(datestr:string){
   return datestr
 }
 
-const sorter = (colName:string) => {
-  if (colName === "Dates"){
-    return (a:any, b:any) => {
+const sorter = (colName: string) => {
+  if (colName === "Dates") {
+    return (a: any, b: any) => {
       const x = monthToNum(a[colName][0].text);
       const y = monthToNum(b[colName][0].text);
       return x > y ? -1 : x < y ? 1 : 0;
@@ -101,7 +117,7 @@ const sorter = (colName:string) => {
   }
 }
 
-const filterable = (colName:string, rows:Array<{[key: string]: HTRecord[]}>) => {
+const filterable = (colName: string, rows: Array<{ [key: string]: HTRecord[] }>) => {
   let filterTerms = ["final", "preliminary", "not_yet"]
   let cells = rows.map((row) => row[colName]).flat().filter((value) => value !== undefined)
   let canFilter = cells.some((value) => filterTerms.some(term => value.status !== null && value.status.includes(term)))
@@ -110,8 +126,8 @@ const filterable = (colName:string, rows:Array<{[key: string]: HTRecord[]}>) => 
 
 function App() {
   const [columns, setColumns] = useState<string[]>([]);
-  const [rows, setRows] = useState<Array<{string: HTRecord[]}>>([])
-  const [dateSort, setDateSort] = useState<"ascend"|"descend"|null>("ascend")
+  const [rows, setRows] = useState<Array<{ string: HTRecord[] }>>([])
+  const [dateSort, setDateSort] = useState<"ascend" | "descend" | null>("ascend")
 
   useEffect(() => {
     (async () => {
@@ -132,22 +148,22 @@ function App() {
       fixed: colName === "Cruise",
       render: (record: any) => <Cell record={record} />,
       sorter: sorter(colName),
-      sortOrder: colName === "Dates" ? dateSort: undefined,
+      sortOrder: colName === "Dates" ? dateSort : undefined,
       filters: canFilter ? [
-        {text: "Final", value: "final"},
-        {text: "Submitted", value: "preliminary"},
-        {text: "Not Received", value: "not_yet"},
+        { text: "Final", value: "final" },
+        { text: "Submitted", value: "preliminary" },
+        { text: "Not Received", value: "not_yet" },
       ] : undefined,
-      onFilter: (value:any, record:any) => {
+      onFilter: (value: any, record: any) => {
         const col = record[colName]
 
-        if (col === undefined){
+        if (col === undefined) {
           return false
         }
 
-        for (let i = 0; i < col.length; i++){
+        for (let i = 0; i < col.length; i++) {
           let item = col[i];
-          if (item.status !== null && item.status.includes(value)){
+          if (item.status !== null && item.status.includes(value)) {
             return true
           }
         }
@@ -158,15 +174,15 @@ function App() {
 
   return (
     <div className="App">
-      <button onClick={()=> downloadXLS(columns, rows)}>Download XLSX</button>
-      <Table 
-      columns={tableCols} 
-      dataSource={rows} 
-      size="small"
-      scroll={{ x: tableCols.reduce((accum, current) => accum + current.width, 0) }} 
-      sticky 
-      pagination={false}
-      onChange={(pagination, filters, sorter) => setDateSort((sorter as any).order)}/> 
+      <button onClick={() => downloadXLS(columns, rows)}>Download XLSX</button>
+      <Table
+        columns={tableCols}
+        dataSource={rows}
+        size="small"
+        scroll={{ x: tableCols.reduce((accum, current) => accum + current.width, 0) }}
+        sticky
+        pagination={false}
+        onChange={(pagination, filters, sorter) => setDateSort((sorter as any).order)} />
     </div>
   );
 }

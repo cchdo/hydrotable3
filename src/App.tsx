@@ -1,12 +1,18 @@
 import React, { useEffect, useState, memo } from 'react';
-import { Table, Tag } from 'antd';
+import { Table, Tag, Button } from 'antd';
 import XLSX from "xlsx"
 import 'antd/dist/antd.css';
+
+const colWidth = 260;
 
 interface HTRecord {
   text: string | number | null;
   href: string | null;
   status: string | null;
+}
+
+const checkWidth = () => {
+  return window.innerWidth > colWidth * 2.5;
 }
 
 const downloadXLS = (columns: string[], rows: Array<{ [key: string]: HTRecord[] }>) => {
@@ -128,6 +134,8 @@ function App() {
   const [columns, setColumns] = useState<string[]>([]);
   const [rows, setRows] = useState<Array<{ string: HTRecord[] }>>([])
   const [dateSort, setDateSort] = useState<"ascend" | "descend" | null>("ascend")
+  const [loading, setLoading] = useState(true)
+  const [fixedCol, setFixedCol] = useState(checkWidth())
 
   useEffect(() => {
     (async () => {
@@ -135,8 +143,18 @@ function App() {
       const parsed = await data.json()
       setColumns(parsed.columns)
       setRows(parsed.rows)
+      setLoading(false)
     })()
   }, []);
+  useEffect(() => {
+    window.addEventListener("resize", () => {
+      if (checkWidth()){
+        setFixedCol(true)
+      } else {
+        setFixedCol(false)
+      }
+    })
+  }, [])
 
   const tableCols = columns.map((colName) => {
     let canFilter = filterable(colName, rows)
@@ -144,8 +162,8 @@ function App() {
       title: colName,
       dataIndex: colName,
       key: colName,
-      width: 260,
-      fixed: colName === "Cruise",
+      width: colWidth,
+      fixed: colName === "Cruise" && fixedCol,
       render: (record: any) => <Cell record={record} />,
       sorter: sorter(colName),
       sortOrder: colName === "Dates" ? dateSort : undefined,
@@ -174,8 +192,9 @@ function App() {
 
   return (
     <div className="App">
-      <button onClick={() => downloadXLS(columns, rows)}>Download XLSX</button>
+      <Button disabled={loading} type="primary" shape="round" onClick={() => downloadXLS(columns, rows)}>Download XLSX</Button>
       <Table
+        loading={loading}
         columns={tableCols}
         dataSource={rows}
         size="small"

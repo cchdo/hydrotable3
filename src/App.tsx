@@ -28,15 +28,15 @@ const TagDefs = () => {
       >
         <dl>
           <dt><Tag color="green">Final</Tag></dt>
-          <dd>Data are received and merged into the dataset with no updates for this parameter expected.</dd>
+          <dd>Data are received and merged into the dataset or available at the linked location, with no expected updates for this parameter.</dd>
           <dt><Tag color="green">Preliminary</Tag></dt>
-          <dd>Data have been received and merged into the dataset but updates for this parameter are expected (e.g. post cruise calibration)</dd>
+          <dd>Data are received and merged into the dataset or available at the linked location, with expected updates for this parameter (e.g. post cruise calibration).</dd>
           <dt><Tag color="yellow">Final</Tag></dt>
-          <dd>Data with no expected updates are received and available as is while pending merging into the dataset.</dd>
+          <dd>Data are received and available as is, with no expected updates. Merging into the dataset is pending.</dd>
           <dt><Tag color="yellow">Preliminary</Tag></dt>
-          <dd>Data with expected updates are received and available as is while pending merging into the dataset.</dd>
+          <dd>Data are received and available as is, with expected updates. Merging into the dataset is pending.</dd>
           <dt><Tag color="red">Funded</Tag></dt>
-          <dd>Samples for this parameter have been collected, analytical results are expected within the timelines set by GO-SHIP.</dd>
+          <dd>Samples for this parameter have been collected. Analytical results are expected within the timelines set by GO-SHIP.</dd>
           <dt><Tag color="red">Unfunded</Tag></dt>
           <dd>Samples for this parameter have been collected, but no funds are available for analysis. These data are not expected to be received.</dd>
         </dl>

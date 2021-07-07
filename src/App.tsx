@@ -1,5 +1,5 @@
 import React, { useEffect, useState, memo } from 'react';
-import { Table, Tag, Button } from 'antd';
+import { Table, Tag, Button, Drawer } from 'antd';
 import XLSX from "xlsx"
 import 'antd/dist/antd.css';
 
@@ -13,6 +13,36 @@ interface HTRecord {
 
 const checkWidth = () => {
   return window.innerWidth > colWidth * 2.5;
+}
+
+const TagDefs = () => {
+  const [visible, setVisible] = useState(false)
+  return (
+    <>
+      <Button shape="round" onClick={() => setVisible(true)}>Status Definitions</Button>
+      <Drawer
+        title="Status Definitions"
+        placement="left"
+        visible={visible}
+        onClose={() => setVisible(false)}
+      >
+        <dl>
+          <dt><Tag color="green">Final</Tag></dt>
+          <dd>Data are received and merged into the dataset with no updates for this parameter expected.</dd>
+          <dt><Tag color="green">Preliminary</Tag></dt>
+          <dd>Data have been received and merged into the dataset but updates for this parameter are expected (e.g. post cruise calibration)</dd>
+          <dt><Tag color="yellow">Final</Tag></dt>
+          <dd>Data with no expected updates are received and available as is while pending merging into the dataset.</dd>
+          <dt><Tag color="yellow">Preliminary</Tag></dt>
+          <dd>Data with expected updates are received and available as is while pending merging into the dataset.</dd>
+          <dt><Tag color="red">Funded</Tag></dt>
+          <dd>Samples for this parameter have been collected, analytical results are expected within the timelines set by GO-SHIP.</dd>
+          <dt><Tag color="red">Unfunded</Tag></dt>
+          <dd>Samples for this parameter have been collected, but no funds are available for analysis. These data are not expected to be received.</dd>
+        </dl>
+      </Drawer>
+    </>
+  )
 }
 
 const downloadXLS = (columns: string[], rows: Array<{ [key: string]: HTRecord[] }>) => {
@@ -148,7 +178,7 @@ function App() {
   }, []);
   useEffect(() => {
     window.addEventListener("resize", () => {
-      if (checkWidth()){
+      if (checkWidth()) {
         setFixedCol(true)
       } else {
         setFixedCol(false)
@@ -193,6 +223,7 @@ function App() {
   return (
     <div className="App">
       <Button disabled={loading} type="primary" shape="round" onClick={() => downloadXLS(columns, rows)}>Download XLSX</Button>
+      <TagDefs />
       <Table
         loading={loading}
         columns={tableCols}

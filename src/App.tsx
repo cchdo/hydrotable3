@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { Table, Tag, Button, Drawer } from 'antd';
 import XLSX from "xlsx"
 import 'antd/dist/antd.css';
@@ -15,6 +15,7 @@ const checkWidth = () => {
   return window.innerWidth > colWidth * 2.5;
 }
 
+// @ts-ignore
 const TagDefs = () => {
   const [visible, setVisible] = useState(false)
   return (
@@ -223,7 +224,6 @@ function App() {
   return (
     <div className="App">
       <Button disabled={loading} type="primary" shape="round" onClick={() => downloadXLS(columns, rows)}>Download XLSX</Button>
-      <TagDefs />
       <Table
         loading={loading}
         columns={tableCols}
@@ -232,7 +232,7 @@ function App() {
         scroll={{ x: tableCols.reduce((accum, current) => accum + current.width, 0) }}
         sticky
         pagination={false}
-        onChange={(pagination, filters, sorter) => setDateSort((sorter as any).order)} />
+        onChange={(_pagination, _filters, sorter) => setDateSort((sorter as any).order)} />
     </div>
   );
 }
